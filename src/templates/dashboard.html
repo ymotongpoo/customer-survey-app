@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Customer Survey App{% endblock %}
+
+{% block content %}
+<section class="dashboard">
+    <div class="dashboard-header">
+        <h1>Welcome, {{ current_user.alias }}</h1>
+        <p>Manage your customer surveys and view feedback results.</p>
+    </div>
+
+    <div class="dashboard-actions">
+        <a href="{{ url_for('main.create_survey') }}" class="btn btn-primary">Create New Survey</a>
+    </div>
+
+    <div class="surveys-container">
+        <h2>Your Surveys</h2>
+        
+        {% if surveys %}
+            <div class="survey-list">
+                {% for survey in surveys %}
+                    <div class="survey-card">
+                        <div class="survey-info">
+                            <h3>{{ survey.title }}</h3>
+                            <p>{{ survey.description }}</p>
+                            <p class="survey-meta">
+                                Created: {{ survey.created_at.strftime('%Y-%m-%d') }} | 
+                                Status: {% if survey.is_active %}Active{% else %}Inactive{% endif %}
+                            </p>
+                        </div>
+                        <div class="survey-actions">
+                            <a href="{{ url_for('main.view_survey', survey_id=survey.survey_id) }}" class="btn btn-secondary">View Results</a>
+                            <a href="{{ url_for('main.edit_survey', survey_id=survey.survey_id) }}" class="btn btn-outline">Edit</a>
+                            
+                            {% if survey.is_active %}
+                                <div class="share-link">
+                                    <p>Share Link:</p>
+                                    <input type="text" readonly value="{{ request.host_url }}respond/{{ survey.survey_id }}" class="share-input">
+                                    <button class="btn btn-small copy-btn" data-clipboard-text="{{ request.host_url }}respond/{{ survey.survey_id }}">Copy</button>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>You haven't created any surveys yet.</p>
+                <a href="{{ url_for('main.create_survey') }}" class="btn btn-primary">Create Your First Survey</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        new ClipboardJS('.copy-btn');
+        
+        // Add click event for copy buttons
+        document.querySelectorAll('.copy-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                this.textContent = 'Copied!';
+                setTimeout(() => {
+                    this.textContent = 'Copy';
+                }, 2000);
+            });
+        });
+    });
+</script>
+{% endblock %}

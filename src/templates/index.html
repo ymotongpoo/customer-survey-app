@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Customer Survey App{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Welcome to Customer Survey Application</h1>
+    <p>Create and share surveys to collect valuable feedback from your customers.</p>
+    
+    <div class="cta-buttons">
+        <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-secondary">Register</a>
+    </div>
+</section>
+
+<section class="features">
+    <h2>Features</h2>
+    <div class="feature-grid">
+        <div class="feature-card">
+            <h3>Create Surveys</h3>
+            <p>Design custom surveys with multiple choice questions.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Share with Customers</h3>
+            <p>Generate shareable links to collect feedback from your customers.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Analyze Results</h3>
+            <p>View and analyze survey responses to gain valuable insights.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Create Survey{% endblock %}
+
+{% block content %}
+<section class="create-survey">
+    <h1>Create New Survey</h1>
+    
+    <form method="post" class="survey-form">
+        <div class="form-group">
+            <label for="title">Survey Title:</label>
+            <input type="text" id="title" name="title" required maxlength="200">
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Description (optional):</label>
+            <textarea id="description" name="description" rows="3" maxlength="500"></textarea>
+        </div>
+        
+        <div class="options-container">
+            <h3>Survey Options (2-5):</h3>
+            <p class="form-help">Add between 2 and 5 options for your survey.</p>
+            
+            <div id="options-list">
+                <div class="option-item">
+                    <label for="option1">Option 1:</label>
+                    <input type="text" id="option1" name="options[]" required>
+                </div>
+                <div class="option-item">
+                    <label for="option2">Option 2:</label>
+                    <input type="text" id="option2" name="options[]" required>
+                </div>
+            </div>
+            
+            <div class="option-actions">
+                <button type="button" id="add-option" class="btn btn-outline">Add Option</button>
+                <button type="button" id="remove-option" class="btn btn-outline" disabled>Remove Option</button>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Create Survey</button>
+        </div>
+    </form>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const optionsList = document.getElementById('options-list');
+        const addOptionBtn = document.getElementById('add-option');
+        const removeOptionBtn = document.getElementById('remove-option');
+        
+        // Enable remove button if we have more than 2 options
+        if (optionsList.children.length > 2) {
+            removeOptionBtn.disabled = false;
+        }
+        
+        // Add option button
+        addOptionBtn.addEventListener('click', function() {
+            const optionCount = optionsList.children.length + 1;
+            
+            if (optionCount <= 5) {
+                const newOption = document.createElement('div');
+                newOption.className = 'option-item';
+                newOption.innerHTML = `
+                    <label for="option${optionCount}">Option ${optionCount}:</label>
+                    <input type="text" id="option${optionCount}" name="options[]" required>
+                `;
+                
+                optionsList.appendChild(newOption);
+                
+                // Enable remove button
+                removeOptionBtn.disabled = false;
+                
+                // Disable add button if we reached 5 options
+                if (optionCount >= 5) {
+                    addOptionBtn.disabled = true;
+                }
+            }
+        });
+        
+        // Remove option button
+        removeOptionBtn.addEventListener('click', function() {
+            const optionCount = optionsList.children.length;
+            
+            if (optionCount > 2) {
+                optionsList.removeChild(optionsList.lastChild);
+                
+                // Enable add button
+                addOptionBtn.disabled = false;
+                
+                // Disable remove button if we have only 2 options
+                if (optionsList.children.length <= 2) {
+                    removeOptionBtn.disabled = true;
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

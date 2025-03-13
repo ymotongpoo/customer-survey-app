@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}{{ survey.title }} - Results{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
+{% endblock %}
+
+{% block content %}
+<section class="survey-results">
+    <div class="survey-header">
+        <h1>{{ survey.title }}</h1>
+        <p>{{ survey.description }}</p>
+    </div>
+
+    <div class="survey-meta">
+        <p>Created: {{ survey.created_at.strftime('%Y-%m-%d') }}</p>
+        <p>Status: {% if survey.is_active %}Active{% else %}Inactive{% endif %}</p>
+        <p>Total Responses: {{ total_responses }}</p>
+    </div>
+
+    {% if total_responses > 0 %}
+        <div class="results-container">
+            <div class="chart-container">
+                <canvas id="resultsChart"></canvas>
+            </div>
+            
+            <div class="results-table">
+                <h3>Response Breakdown</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Option</th>
+                            <th>Responses</th>
+                            <th>Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for option in options %}
+                            <tr>
+                                <td>{{ option.option_text }}</td>
+                                <td>{{ results.get(option.option_text, 0) }}</td>
+                                <td>
+                                    {% if total_responses > 0 %}
+                                        {{ ((results.get(option.option_text, 0) / total_responses) * 100) | round(1) }}%
+                                    {% else %}
+                                        0%
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>No responses yet. Share your survey to collect feedback.</p>
+        </div>
+    {% endif %}
+
+    <div class="share-section">
+        <h3>Share Your Survey</h3>
+        <p>Copy this link to share with your customers:</p>
+        <div class="share-link-container">
+            <input type="text" readonly value="{{ share_link }}" class="share-input">
+            <button class="btn btn-primary copy-btn" data-clipboard-text="{{ share_link }}">Copy Link</button>
+        </div>
+    </div>
+
+    <div class="survey-actions">
+        <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        <a href="{{ url_for('main.edit_survey', survey_id=survey.survey_id) }}" class="btn btn-outline">Edit Survey</a>
+        {% if survey.is_active %}
+            <form action="{{ url_for('main.toggle_survey_status', survey_id=survey.survey_id) }}" method="post" class="inline-form">
+                <button type="submit" class="btn btn-danger">Deactivate Survey</button>
+            </form>
+        {% else %}
+            <form action="{{ url_for('main.toggle_survey_status', survey_id=survey.survey_id) }}" method="post" class="inline-form">
+                <button type="submit" class="btn btn-success">Activate Survey</button>
+            </form>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize clipboard.js
+        new ClipboardJS('.copy-btn');
+        
+        // Add click event for copy button
+        document.querySelector('.copy-btn').addEventListener('click', function() {
+            this.textContent = 'Copied!';
+            setTimeout(() => {
+                this.textContent = 'Copy Link';
+            }, 2000);
+        });
+
+        {% if total_responses > 0 %}
+        // Initialize chart
+        const ctx = document.getElementById('resultsChart').getContext('2d');
+        const resultsChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: [{% for option in options %}'{{ option.option_text }}',{% endfor %}],
+                datasets: [{
+                    data: [{% for option in options %}{{ results.get(option.option_text, 0) }},{% endfor %}],
+                    backgroundColor: [
+                        '#4CAF50',
+                        '#2196F3',
+                        '#FFC107',
+                        '#F44336',
+                        '#9C27B0'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Survey Results'
+                    }
+                }
+            }
+        });
+        {% endif %}
+    });
+</script>
+{% endblock %}

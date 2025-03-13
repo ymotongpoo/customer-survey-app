@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<section class="profile">
+    <h1>Your Profile</h1>
+    
+    <div class="profile-info">
+        <div class="info-group">
+            <label>Email:</label>
+            <p>{{ current_user.email }}</p>
+        </div>
+        
+        <div class="info-group">
+            <label>Display Name:</label>
+            <p>{{ current_user.alias }}</p>
+        </div>
+        
+        <div class="info-group">
+            <label>Member Since:</label>
+            <p>{{ current_user.created_at.strftime('%Y-%m-%d') }}</p>
+        </div>
+        
+        <div class="info-group">
+            <label>Last Login:</label>
+            <p>{{ current_user.last_login.strftime('%Y-%m-%d %H:%M') if current_user.last_login else 'N/A' }}</p>
+        </div>
+    </div>
+    
+    <div class="profile-edit">
+        <h2>Edit Profile</h2>
+        
+        <form method="post" class="form">
+            <div class="form-group">
+                <label for="alias">Display Name:</label>
+                <input type="text" id="alias" name="alias" value="{{ current_user.alias }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="current_password">Current Password:</label>
+                <input type="password" id="current_password" name="current_password">
+                <p class="form-help">Required only if changing password</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="new_password">New Password:</label>
+                <input type="password" id="new_password" name="new_password" minlength="8">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_password">Confirm New Password:</label>
+                <input type="password" id="confirm_password" name="confirm_password" minlength="8">
+            </div>
+            
+            <div class="form-actions">
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
